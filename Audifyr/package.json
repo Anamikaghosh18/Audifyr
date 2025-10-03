@@ -1,0 +1,12 @@
+{
+  "name": "audifyr",
+  "version": "1.0.0",
+  "scripts": {
+    "server": "cd server && npm install && npm run dev",
+    "client": "cd client && npm install && npm run dev",
+    "start": "concurrently --kill-others-on-fail \"npm run server\" \"npm run client\""
+  },
+  "devDependencies": {
+    "concurrently": "^9.2.1"
+  }
+}
