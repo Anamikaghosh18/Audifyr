@@ -2,6 +2,9 @@ import { useState } from "react";
 import { Eye, EyeOff, Mail, Lock } from "lucide-react";
 import logo from "/favicon.png";
 import googlelogo from "../assets/google.png";
+import { useNavigate, Link } from "react-router-dom";
+import { signInWithEmailAndPassword } from "firebase/auth";
+import { auth, provider, signInWithPopup } from "../Firebase/firebase";
 
 export default function SignIn() {
   const [email, setEmail] = useState("");
@@ -10,19 +13,37 @@ export default function SignIn() {
   const [isLoading, setIsLoading] = useState(false);
   const [rememberMe, setRememberMe] = useState(false);
 
+  const navigate = useNavigate(); // ref=direct to the dashboard
+
   const handleSubmit = async (e) => {
     e.preventDefault();
     setIsLoading(true);
-    await new Promise((resolve) => setTimeout(resolve, 1000));
-    console.log(
-      "Email:",
-      email,
-      "Password:",
-      password,
-      "Remember Me:",
-      rememberMe
-    );
-    setIsLoading(false);
+
+    try {
+      // login with Firebase
+      await signInWithEmailAndPassword(auth, email, password);
+      navigate("/workspace", { replace: true });
+
+      if (rememberMe) {
+        console.log("User will be remembered!");
+      }
+
+      alert("Login successful!");
+    } catch (err) {
+      alert(err.message);
+    } finally {
+      setIsLoading(false);
+    }
+  };
+
+  const handleGoogleSignIn = async () => {
+    try {
+      await signInWithPopup(auth, provider); // uses Firebase auth and Google provider
+      navigate("/workspace", { replace: true });
+      alert("Google Sign-In successful!");
+    } catch (err) {
+      alert("Google Sign-In failed: " + err.message);
+    }
   };
 
   return (
@@ -201,19 +222,23 @@ export default function SignIn() {
           </div>
 
           {/* Google */}
-          <button className="w-full py-2.5 border border-gray-300 rounded-lg flex items-center justify-center gap-2 hover:bg-blue-50 transition text-gray-700">
+          <button
+            type="button"
+            onClick={handleGoogleSignIn}
+            className="w-full py-2.5 border border-gray-300 rounded-lg flex items-center justify-center gap-2 hover:bg-blue-50 transition text-gray-700"
+          >
             <img src={googlelogo} alt="Google" className="w-5 h-5" />
             Continue with Google
           </button>
 
           <p className="text-gray-600 text-center mt-6">
             Don't have an account?{" "}
-            <a
-              href="/signup"
+            <Link
+              to="/signup"
               className="text-blue-600 hover:underline font-medium"
             >
               Sign up
-            </a>
+            </Link>
           </p>
         </div>
       </div>
